@@ -1,0 +1,8 @@
+# Ignore Go mod files
+/go.mod
+/go.sum
+
+# Ignore Go build info files
+/build
+/build.info
+*.db
