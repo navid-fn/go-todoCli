@@ -77,7 +77,7 @@ func main() {
 		fmt.Println("3. Quit")
 
 		var choice string
-		fmt.Print("You Choice:")
+		fmt.Print("Your Choice:")
 		fmt.Scanln(&choice)
 		switch choice {
 		case "1":
