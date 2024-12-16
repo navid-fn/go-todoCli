@@ -114,7 +114,13 @@ func MarkComplete(todoId int) error {
 	
 }
 
-// TODO: add function to clean(remove) table todo
-func CleanTable() {
+func CleanTable() error {
+	db, err := Getdb()
+	if err != nil {
+		return err
+	}
+	defer db.Close()
 
+	_, err = db.Exec("DELETE FROM todo")
+	return err
 }

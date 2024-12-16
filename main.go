@@ -1,95 +1,54 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"log"
 	"os"
-	"time"
 
-	"github.com/mshafiee/jalali"
+	"github.com/fatih/color"
 	"navid-fn.com/command-line-tool/db"
+	"navid-fn.com/command-line-tool/todo"
 )
 
-func listTodo() {
-	todos, err := db.GetallTodos()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, todo := range todos {
-		tehran, _ := time.LoadLocation("Asia/Tehran")
-		JcreatedAt := jalali.JalaliFromTime(todo.CreatedAt.In(tehran)).Format("%Y/%m/%d %H:%M")
-		fmt.Printf("ID %d, Title: %s, Context: %s, Completed: %t, CreatedAt: %s \n",todo.Id, todo.Title, todo.Context, todo.Completed,
-			JcreatedAt)
-	}
-}
-
-func addTodo() {
-	reader := bufio.NewReader(os.Stdin)
-
-	fmt.Print("Enter todo title: ")
-	title, _ := reader.ReadString('\n')
-
-	fmt.Print("Enter todo description: ")
-	context, _ := reader.ReadString('\n')
-
-	err := db.AddTodo(title, context)
-	if err != nil {
-		fmt.Println("Something is Wrong!")
-		log.Fatal(err)
-	} else {
-		fmt.Println("Added Successfully")
-	}
-}
-
-func markCompleteTodo() {
-	var choice string
-	fmt.Println("Want to mark ToDo?")
-	fmt.Println("1. YES")
-	fmt.Println("2. NO")
-	fmt.Scanln(&choice)
-	switch choice {
-	case "1":
-		var todoId int
-		fmt.Println("Select ID")
-		fmt.Scanln(&todoId)
-		err := db.MarkComplete(todoId)
-		if err != nil {
-			fmt.Println("Error Accouired")
-			log.Fatal(err)
-		}
-		fmt.Printf("Done! id %d is set to True \n", todoId)
-	case "2":
-		return
-	}
-
-}
-
 func main() {
-	fmt.Println("TODO App!")
+	cyan := color.New(color.FgCyan, color.Bold)
+	green := color.New(color.FgGreen)
+	yellow := color.New(color.FgYellow)
+	red := color.New(color.FgRed)
+
+	// Set up signal handling for main menu
+	cyan.Println("📝 TODO App!")
 	if !db.FileExists() {
 		db.Createdb()
 	}
+
 	for {
-		fmt.Println("1. Add ToDo")
-		fmt.Println("2. List ToDo")
-		fmt.Println("3. Quit")
+		fmt.Println("\n=========================")
+		yellow.Println("Choose an option:")
+		fmt.Println("=========================")
+		green.Println("1. ➕ Add ToDo")
+		green.Println("2. 📋 List ToDo")
+		green.Println("3. 🗑️  Flush Table")
+		red.Println("4. 👋 Quit")
+		fmt.Println("=========================")
 
 		var choice string
-		fmt.Print("Your Choice:")
+
+		yellow.Print("Your Choice: ")
 		fmt.Scanln(&choice)
+
 		switch choice {
 		case "1":
-			addTodo()
+			todo.AddTodo()
 		case "2":
-			listTodo()
-			markCompleteTodo()
+			todo.ListTodo()
 		case "3":
-			fmt.Println("Have A nice Day!")
-			return
+			todo.CleanTodoTable()
+		case "4":
+			cyan.Println("Have A nice Day! 👋")
+			os.Exit(0)
 		default:
-			fmt.Println("Invalid choice! try again!")
+			fmt.Printf("Your choice is: %s\n", choice)
+			red.Println("Invalid choice! Please try again.")
 		}
 	}
 }
