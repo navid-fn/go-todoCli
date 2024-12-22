@@ -29,6 +29,7 @@ func ListTodo() {
 	table.Render()
 	fmt.Println()
 	MarkCompleteTodo()
+	DeleteToDo()
 }
 
 func AddTodo() {
@@ -169,4 +170,32 @@ func SearchTitle() {
 	fmt.Println()
 	table.Render()
 	fmt.Println()
+}
+
+func DeleteToDo() {
+	var choice string
+	yellow := color.New(color.FgGreen)
+	red := color.New(color.FgRed)
+	green := color.New(color.FgGreen)
+
+	yellow.Println("Want to delete a ToDo?")
+	green.Println("1. ✅ YES")
+	red.Println("2. ❌ NO")
+
+	fmt.Scanln(&choice)
+
+	switch choice {
+	case "1":
+		var todoId int
+		yellow.Println("Select ID")
+		fmt.Scanln(&todoId)
+		err := db.DeleteFromTodo(todoId)
+		if err != nil {
+			red.Println("❌ Error occurred")
+			log.Fatal(err)
+		}
+		green.Printf("%d Deleted Successfully", todoId)
+	case "2":
+		return
+	}
 }

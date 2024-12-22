@@ -147,3 +147,13 @@ func SearchTitle(title string) ([]Todo, error) {
 	}
 	return todos, nil
 }
+
+func DeleteFromTodo(id int) error {
+	db, err := Getdb()
+	if err != nil {
+		return err 
+	}
+	defer db.Close()
+	_, err  = db.Exec("DELETE FROM todo WHERE id = ?", id)
+	return err
+}
