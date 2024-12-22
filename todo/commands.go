@@ -6,13 +6,9 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/fatih/color"
-	"github.com/mshafiee/jalali"
-	"github.com/olekukonko/tablewriter"
 	"navid-fn.com/command-line-tool/db"
 )
 
@@ -22,51 +18,12 @@ func ListTodo() {
 		log.Fatal(err)
 	}
 
-	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"ID", "Title", "Context", "Completed", "Created At"})
-	
-	// Table style configuration
-	table.SetAutoWrapText(false)
-	table.SetAutoFormatHeaders(true)
-	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
-	table.SetAlignment(tablewriter.ALIGN_LEFT)
-	table.SetBorder(true)
-	table.SetHeaderColor(
-		tablewriter.Colors{tablewriter.FgHiYellowColor, tablewriter.Bold},
-		tablewriter.Colors{tablewriter.FgHiYellowColor, tablewriter.Bold},
-		tablewriter.Colors{tablewriter.FgHiYellowColor, tablewriter.Bold},
-		tablewriter.Colors{tablewriter.FgHiYellowColor, tablewriter.Bold},
-		tablewriter.Colors{tablewriter.FgHiYellowColor, tablewriter.Bold},
-	)
-	table.SetColumnColor(
-		tablewriter.Colors{tablewriter.FgHiCyanColor},
-		tablewriter.Colors{tablewriter.FgHiWhiteColor},
-		tablewriter.Colors{tablewriter.FgHiWhiteColor},
-		tablewriter.Colors{tablewriter.FgHiGreenColor},
-		tablewriter.Colors{tablewriter.FgHiMagentaColor},
-	)
-
-	for _, todo := range todos {
-		tehran, _ := time.LoadLocation("Asia/Tehran")
-		JcreatedAt := jalali.JalaliFromTime(todo.CreatedAt.In(tehran)).Format("%Y/%m/%d %H:%M")
-		completed := "❌"
-		if todo.Completed {
-			completed = "✅"
-		}
-		table.Append([]string{
-			strconv.Itoa(todo.Id),
-			todo.Title,
-			todo.Context,
-			completed,
-			JcreatedAt,
-		})
-	}
-
 	if len(todos) == 0 {
 		yellow := color.New(color.FgYellow)
 		yellow.Println("📝 No todos found. Add some todos to get started!")
 		return
 	}
+	table := TurnTodoToTable(todos)
 
 	fmt.Println()
 	table.Render()
@@ -148,7 +105,6 @@ func AddTodo() {
 	}
 }
 
-
 func MarkCompleteTodo() {
 	var choice string
 	green := color.New(color.FgGreen)
@@ -185,4 +141,32 @@ func CleanTodoTable() {
 		return
 	}
 	green.Println("✨ Todo table cleaned successfully!")
+}
+
+func SearchTitle() {
+	reader := bufio.NewReader(os.Stdin)
+	green := color.New(color.FgGreen)
+	green.Print("📝 Enter todo Title for search: ")
+	title, err := reader.ReadString('\n')
+	if err != nil {
+		panic("ERROR OCCOURED")
+	}
+	title = strings.TrimSpace(title)
+	todos, err := db.SearchTitle(title)
+	if err != nil {
+		panic("ERROR OCCOURED")
+	}
+
+	if len(todos) == 0 {
+		yellow := color.New(color.FgYellow)
+
+		fmt.Println()
+		yellow.Println("📝 No todos found. Add some todos to get started!")
+		return
+	}
+	table := TurnTodoToTable(todos)
+
+	fmt.Println()
+	table.Render()
+	fmt.Println()
 }

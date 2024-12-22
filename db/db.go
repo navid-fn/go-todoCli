@@ -51,6 +51,19 @@ func Createdb() {
 	fmt.Println("Database created...")
 }
 
+func Getdb() (*sql.DB, error) {
+	db, err := sql.Open("sqlite3", dbFile)
+	if err != nil {
+		return nil, err
+	}
+
+	err = db.Ping()
+	if err != nil {
+		return nil, err
+	}
+	return db, nil
+}
+
 func GetallTodos() ([]Todo, error) {
 	db, err := Getdb()
 	if err != nil {
@@ -75,30 +88,17 @@ func GetallTodos() ([]Todo, error) {
 	return todos, nil
 }
 
-func Getdb() (*sql.DB, error) {
-	db, err := sql.Open("sqlite3", dbFile)
-	if err != nil {
-		return nil, err
-	}
-
-	err = db.Ping()
-	if err != nil {
-		return nil, err
-	}
-	return db, nil
-}
-
 func AddTodo(title string, context string) error {
 	db, err := Getdb()
 	if err != nil {
 		return err
 	}
 
-  _, dber := db.Exec(`
+	_, dber := db.Exec(`
     INSERT INTO todo (title, context)
     VALUES (?, ?);
   `, title, context)
-  return dber
+	return dber
 }
 
 func MarkComplete(todoId int) error {
@@ -109,9 +109,9 @@ func MarkComplete(todoId int) error {
 	_, dber := db.Exec(`
 		UPDATE todo SET completed=true where id = ?;
 	`, todoId)
-	
+
 	return dber
-	
+
 }
 
 func CleanTable() error {
@@ -123,4 +123,27 @@ func CleanTable() error {
 
 	_, err = db.Exec("DELETE FROM todo")
 	return err
+}
+
+func SearchTitle(title string) ([]Todo, error) {
+	db, err := Getdb()
+	if err != nil {
+		return nil, err
+	}
+	rows, err := db.Query("SELECT id, title, context, completed, created_at  FROM todo where title = ?", title)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var todos []Todo
+	for rows.Next() {
+		var todo Todo
+		err := rows.Scan(&todo.Id, &todo.Title, &todo.Context, &todo.Completed, &todo.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+		todos = append(todos, todo)
+	}
+	return todos, nil
 }

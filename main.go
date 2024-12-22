@@ -27,8 +27,9 @@ func main() {
 		fmt.Println("=========================")
 		green.Println("1. ➕ Add ToDo")
 		green.Println("2. 📋 List ToDo")
-		green.Println("3. 🗑️  Flush Table")
-		red.Println("4. 👋 Quit")
+		green.Println("3. 🗑️ Flush Table")
+		green.Println("4. 🔍 Search Title")
+		red.Println("5. Quit")
 		fmt.Println("=========================")
 
 		var choice string
@@ -44,6 +45,8 @@ func main() {
 		case "3":
 			todo.CleanTodoTable()
 		case "4":
+			todo.SearchTitle()
+		case "5":
 			cyan.Println("Have A nice Day! 👋")
 			os.Exit(0)
 		default:
